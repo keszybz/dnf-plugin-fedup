@@ -22,7 +22,12 @@
 from __future__ import unicode_literals
 
 import os
+import operator
 import json
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 import argparse
 from argparse import ArgumentParser
@@ -38,6 +43,8 @@ t = gettext.translation(TEXTDOMAIN, fallback=True)
 _ = t.gettext
 # Translators: This string is only used in unit tests.
 _("the color of the sky")
+
+COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/f*'
 
 import uuid
 DOWNLOAD_FINISHED_ID = uuid.UUID('9348174c5cc74001a71ef26bd79d302e')
@@ -63,6 +70,8 @@ NO_KERNEL_MSG = _(
     "No new kernel packages were found.")
 RELEASEVER_MSG = _(
     "Need a --releasever greater than the current system version.")
+DOWNLOAD_HINT_MSG = _( # Translators: do not change "download" here
+    "Use 'dnf %s download --releasever=%s' for the latest version.")
 DOWNLOAD_FINISHED_MSG = _( # Translators: do not change "reboot" here
     "Download complete! Use 'dnf %s reboot' to start the upgrade.")
 DEPRECATED_OPTION = _(
@@ -124,6 +133,15 @@ def checkDataDir(datadir):
 def checkDNFVer():
     if DNFVERSION < StrictVersion("1.1.0"):
         raise CliError(_("This plugin requires DNF 1.1.0 or later."))
+
+def versionCompare(a, b):
+    try:
+        a, b = int(a), int(b)
+    except ValueError:
+        pass
+    return (-1 if a < b else
+            (0 if a == b else
+             +1))
 
 # --- State object - for tracking upgrade state between runs ------------------
 
@@ -281,6 +299,32 @@ def show_log(n):
     boot_id = pick_boot(ID_TO_IDENTIFY_BOOTS, n)
     check_call(['journalctl', '--boot', boot_id.hex])
 
+def list_collections():
+    req = urlopen(COLLECTIONS_URL, timeout=30)
+    text = req.read()
+    data = json.loads(text.decode('utf-8'))
+    return data['collections']
+
+REQUIRED = {'name': str,
+            'version': int,
+            'status': str}
+def validate_release(release):
+    for key, type in REQUIRED.items():
+        try:
+            value = type(release.get(key))
+        except Exception:
+            return None
+        release[key] = value
+    return release
+
+def fedora_releases(collections):
+    releases = [item for item in
+                (validate_release(release) for release in collections)
+                if item is not None]
+    if not releases:
+        raise ValueError('No releases were found')
+    return sorted(releases, key=operator.itemgetter('version'))
+
 # --- Argument parsing helpers ------------------------------------------------
 
 class DeprecatedOption(argparse.Action):
@@ -308,7 +352,7 @@ class PluginArgumentParser(ArgumentParser):
             self.print_help()
             raise CliError(str(e))
 
-ACTIONS = ('download', 'clean', 'reboot', 'upgrade', 'help', 'log')
+ACTIONS = ('download', 'clean', 'reboot', 'upgrade', 'help', 'info', 'log')
 def make_parser(prog):
     p = PluginArgumentParser(prog)
     # show help when passed --help-cmd, like dnf-plugins-core plugins
@@ -365,7 +409,7 @@ class SystemUpgradeCommand(dnf.cli.Command):
     aliases = ('system-upgrade', 'fedup')
     summary = _("Prepare system for upgrade to a new release")
     # NOTE: upgrade isn't meant to be invoked by users, so it's not in usage
-    usage = "[%s] [download --releasever=%s|reboot|clean|log]" % (
+    usage = "[%s] [download --releasever=%s|reboot|clean|info|log]" % (
         _("OPTIONS"), _("VERSION"))
 
     def __init__(self, cli):
@@ -471,6 +515,9 @@ class SystemUpgradeCommand(dnf.cli.Command):
 
     def configure_clean(self, args):
         self.cli.demands.root_user = True
+
+    def configure_info(self, args):
+        pass
 
     def configure_log(self, args):
         pass
@@ -579,6 +626,30 @@ class SystemUpgradeCommand(dnf.cli.Command):
         with self.state:
             self.state.download_status = None
             self.state.upgrade_status = None
+
+    def run_info(self, extcmds):
+        try:
+            collections = list_collections()
+            releases = fedora_releases(collections)
+        except Exception as e:
+            raise CliError(_("Failed to load the list of release from the web: %s %s")
+                           % (type(e).__name__, e))
+        assert releases
+
+        system_ver = dnf.rpm.detect_releasever(self.base.conf.installroot)
+
+        print(_('The following Fedora release are known:'))
+        hint = None
+        for release in releases:
+            arg = ''
+            if (versionCompare(system_ver, release['version']) < 0 and
+                release['status'].lower() == 'active'):
+                hint = release['version']
+            elif versionCompare(system_ver, release['version']) == 0:
+                arg = ' ' + _('(installed)')
+            print('Fedora {} ({}){}'.format(release['version'], release['status'], arg))
+        if hint:
+            print('\n' + DOWNLOAD_HINT_MSG % (self.base.basecmd, release['version']))
 
     def run_log(self, extcmds):
         assert extcmds[0] == 'log'
