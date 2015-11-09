@@ -1,4 +1,4 @@
-VERSION = 0.7.0
+VERSION := $(shell sed -n -r "s/__version__ = '(.*)'/\1/p" system_upgrade.py)
 
 LN ?= ln
 INSTALL ?= install -p

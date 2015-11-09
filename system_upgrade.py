@@ -21,6 +21,8 @@
 
 from __future__ import unicode_literals
 
+__version__ = '0.7.0'
+
 import os
 import json
 
@@ -406,7 +408,8 @@ class SystemUpgradeCommand(dnf.cli.Command):
                      PRIORITY=journal.LOG_NOTICE,
                      SYSTEM_RELEASEVER=self.state.system_releasever,
                      TARGET_RELEASEVER=self.state.target_releasever,
-                     DNF_VERSION=dnf.const.VERSION)
+                     DNF_VERSION=dnf.const.VERSION,
+                     DNF_SYSTEM_UPGRADE_PLUGIN_VERSION=__version__)
 
     # Call sub-functions (like configure_download()) for each possible action.
     # (this tidies things up quite a bit.)
@@ -542,7 +545,7 @@ class SystemUpgradeCommand(dnf.cli.Command):
         with self.state:
             self.state.upgrade_status = 'incomplete'
 
-        self.log_status(_("Starting system upgrade. This will take a while."),
+        self.log_status(_("Starting system upgrade (dnf-plugin-system-upgrade %s)") % __version__,
                         UPGRADE_STARTED_ID)
 
         # reset the splash mode and let the user know we're running
@@ -605,7 +608,7 @@ class SystemUpgradeCommand(dnf.cli.Command):
             state.system_releasever = system_ver
             state.target_releasever = self.base.conf.releasever
         logger.info(DOWNLOAD_FINISHED_MSG, self.base.basecmd)
-        self.log_status(_("Download finished."),
+        self.log_status(_("Download finished (dnf-plugin-system-upgrade %s)") % __version__,
                         DOWNLOAD_FINISHED_ID)
 
     def transaction_upgrade(self):
