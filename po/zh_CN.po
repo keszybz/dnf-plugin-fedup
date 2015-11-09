@@ -59,9 +59,10 @@ msgstr "正在清理已下载的数据…"
 msgid "Download complete! Use 'dnf %s reboot' to start the upgrade."
 msgstr "下载完成！使用 'dnf %s reboot' 来开始升级。"
 
-#: system_upgrade.py:604
-msgid "Download finished."
-msgstr ""
+#: system_upgrade.py:611
+#, python-format
+msgid "Download finished (dnf-plugin-system-upgrade %s)"
+msgstr "下载完成 (dnf-plugin-system-upgrade %s)"
 
 #: system_upgrade.py:65
 msgid "Need a --releasever greater than the current system version."
@@ -97,7 +98,12 @@ msgstr ""
 msgid "Sorry, you need to use 'download --releasever' instead of '--network'"
 msgstr ""
 
-#: system_upgrade.py:541 system_upgrade.py:547
+#: system_upgrade.py:548
+#, python-format
+msgid "Starting system upgrade (dnf-plugin-system-upgrade %s)"
+msgstr "正在开始系统升级 (dnf-plugin-system-upgrade %s)"
+
+#: system_upgrade.py:554
 msgid "Starting system upgrade. This will take a while."
 msgstr "正在开始系统升级。这需要一些时间。"
 
