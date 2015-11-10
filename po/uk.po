@@ -67,9 +67,10 @@ msgstr ""
 "Отримання даних завершено! Скористайтеся командою «dnf %s reboot» для "
 "запуску оновлення."
 
-#: system_upgrade.py:604
-msgid "Download finished."
-msgstr "Отримання даних завершено."
+#: system_upgrade.py:611
+#, python-format
+msgid "Download finished (dnf-plugin-system-upgrade %s)"
+msgstr "Отримання даних завершено (dnf-plugin-system-upgrade %s)"
 
 #: system_upgrade.py:65
 msgid "Need a --releasever greater than the current system version."
@@ -108,7 +109,12 @@ msgid "Sorry, you need to use 'download --releasever' instead of '--network'"
 msgstr ""
 "Вибачте, слід використовувати «download --releasever», а не «--network»"
 
-#: system_upgrade.py:541 system_upgrade.py:547
+#: system_upgrade.py:548
+#, python-format
+msgid "Starting system upgrade (dnf-plugin-system-upgrade %s)"
+msgstr ""
+
+#: system_upgrade.py:554
 msgid "Starting system upgrade. This will take a while."
 msgstr "Починаємо оновлення системи. Будь ласка, зачекайте."
 

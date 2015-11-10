@@ -68,9 +68,10 @@ msgstr ""
 "Ukończono pobieranie. Polecenie „dnf %s reboot” rozpocznie aktualizację "
 "systemu."
 
-#: system_upgrade.py:604
-msgid "Download finished."
-msgstr "Ukończono pobieranie."
+#: system_upgrade.py:611
+#, python-format
+msgid "Download finished (dnf-plugin-system-upgrade %s)"
+msgstr "Ukończono pobieranie (dnf-plugin-system-upgrade %s)"
 
 #: system_upgrade.py:65
 msgid "Need a --releasever greater than the current system version."
@@ -107,7 +108,12 @@ msgstr "Polecenie „dnf system-upgrade” nie obsługuje opcji „%(option)s”
 msgid "Sorry, you need to use 'download --releasever' instead of '--network'"
 msgstr "Należy użyć opcji „download --releasever” zamiast „--network”"
 
-#: system_upgrade.py:541 system_upgrade.py:547
+#: system_upgrade.py:548
+#, python-format
+msgid "Starting system upgrade (dnf-plugin-system-upgrade %s)"
+msgstr ""
+
+#: system_upgrade.py:554
 msgid "Starting system upgrade. This will take a while."
 msgstr "Rozpoczynanie aktualizacji systemu. Może to chwilę zająć."
 

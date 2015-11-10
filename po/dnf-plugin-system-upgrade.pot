@@ -61,8 +61,9 @@ msgstr ""
 msgid "Download complete! Use 'dnf %s reboot' to start the upgrade."
 msgstr ""
 
-#: system_upgrade.py:604
-msgid "Download finished."
+#: system_upgrade.py:611
+#, python-format
+msgid "Download finished (dnf-plugin-system-upgrade %s)"
 msgstr ""
 
 #: system_upgrade.py:65
@@ -99,7 +100,12 @@ msgstr ""
 msgid "Sorry, you need to use 'download --releasever' instead of '--network'"
 msgstr ""
 
-#: system_upgrade.py:541 system_upgrade.py:547
+#: system_upgrade.py:548
+#, python-format
+msgid "Starting system upgrade (dnf-plugin-system-upgrade %s)"
+msgstr ""
+
+#: system_upgrade.py:554
 msgid "Starting system upgrade. This will take a while."
 msgstr ""
 
